@@ -8,7 +8,7 @@ use Validator;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Http\Resources\Cart as CartResource;
 use App\Order;
-use App\Client;
+use App\Product;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -39,16 +39,18 @@ class CartController extends BaseController
         $validator = Validator::make($input,[
             // this client_id will taken by system automatically
             'client_id'     => 'nullable|numeric',
-            'client_name'   => 'required|string',
-            'client_phone'  => 'required|string',
+            'client_name'   => 'nullable|string',
+            'client_phone'  => 'nullable|string',
             'new_address'   => 'string|nullable',
-            'total'         => 'required|numeric',
-            'payment_method'=> 'required|string',
+           // 'total'         => 'required|numeric',
+           // 'payment_method'=> 'required|string',
             'status'        => 'boolean',
             'check'         => 'boolean',
             'Payment_Date'  => 'string|nullable',
             'user_id'       => 'nullable|numeric|exists:users,id',
-            'product_id'    => 'required|numeric|exists:products,id',
+            //'product_id'    => 'required|numeric|exists:products,id',
+
+
         ]);
 
         if ($validator->fails())
@@ -68,10 +70,13 @@ class CartController extends BaseController
             'status'         => $request->status,
             'check'          => $request->check,
             'Payment_Date'   => $request->Payment_Date,
-            'user_id'        => $request->user_id,
-            'product_id'     => $request->product_id,
+            'user_id'        => $request->user_id, // will add by admin in update function
 
         ]);
+
+        $order_ids = Order::find($order_id);
+        $order_ids->products()->attach($product_id);
+
 
         return $this->sendResponse(new CartResource($order) ,'تم اضافة الاوردر بنجاح ' );
     }
